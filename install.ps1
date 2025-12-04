@@ -1,4 +1,4 @@
-$repoZipUrl = "https://github.com/grgsh/grgx-ps/archive/refs/heads/main.zip"
+$repoZipUrl = "https://github.com/grgsh/grgx/archive/refs/heads/main.zip"
 $installDir = Join-Path $env:APPDATA ".grgh\grgx"
 $modulesDir = Join-Path $installDir "modules"
 
