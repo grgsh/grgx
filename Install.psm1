@@ -72,13 +72,101 @@ function Copy-DirectoryIfExist {
                 # Copy-Item copies the contents (*) of the source path to the destination
                 Copy-Item -Path "$SourceDirectory\*" -Destination $DestinationDirectory -Force -Recurse -ErrorAction Stop
         
-                # Original simple success message (Write-Host) remains the only default log
-                Write-Host "$checkmark " -ForegroundColor Green -NoNewline
-                Write-Host "Copied contents of folder: $FolderName/"
+                Write-Verbose "Copied contents of folder: $FolderName/"
         }
         catch {
                 Write-Error "Failed to copy contents from '$SourceDirectory'. Error: $($_.Exception.Message)"
         }
 }
 
-Export-ModuleMember -Function Copy-DirectoryIfExist
+function Get-RemoteZip {
+        [CmdletBinding()]
+        param(
+                [Parameter(Mandatory = $true)]
+                [string]$Url
+        )
+
+        Write-Verbose "Downloading from URL: $Url"
+        Write-Host "Downloading latest version... " -NoNewline
+
+        $tempZip = Join-Path $env:TEMP "grgx.zip"
+
+        try {
+                Invoke-WebRequest -Uri $Url -OutFile $tempZip -ErrorAction Stop
+                Write-Host "$checkmark " -ForegroundColor Green -NoNewline
+                Write-Host "Downloaded"
+                Write-Verbose "Downloaded to $tempZip"
+                return $tempZip
+        }
+        catch {
+                Write-Error "Failed to download zip from '$Url'. Error: $($_.Exception.Message)"
+                return $null
+        }
+}
+
+function Expand-ReleaseZip {
+        [CmdletBinding()]
+        param(
+                [Parameter(Mandatory = $true)]
+                [string]$Path
+        )
+
+        Write-Verbose "Extracting: $Path"
+        Write-Host "Extracting... " -NoNewline
+
+        $tempDir = Join-Path $env:TEMP "grgx-extract"
+        
+        try {
+                # Cleanup existing temp directory if present
+                if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
+                Expand-Archive -Path $Path -DestinationPath $tempDir -Force
+    
+                # $extractedRoot = Get-ChildItem $tempDir -Directory | Select-Object -First 1
+
+                Write-Host "$checkmark " -ForegroundColor Green -NoNewline
+                Write-Host "Extracted"
+                Write-Verbose "Extracted to $tempDir"
+
+                return $tempDir
+        }
+        catch {
+                Write-Error "Failed to extract zip from '$Path'. Error: $($_.Exception.Message)"
+                return $null
+        }
+}
+
+function Show-GrgxLogo {
+        <#
+.SYNOPSIS
+    Displays the GRGX logo in ASCII art.
+.DESCRIPTION
+    Outputs the GRGX ASCII logo using Write-Host for visual display.
+.EXAMPLE
+    Show-GrgxLogo
+#>
+        [CmdletBinding()]
+        param()
+
+        # ASCII Art for GRGX using a here-string for literal output
+        $Logo = @'
++-------------------------------------------------------+
+|                                                       |
+|    ,adPPYb,d8  8b,dPPYba,   ,adPPYb,d8  8b,     ,d8   |
+|   a8"    `Y88  88P'   "Y8  a8"    `Y88   `Y8, ,8P'    |
+|   8b       88  88          8b       88     )888(      |
+|   "8a,   ,d88  88          "8a,   ,d88   ,d8" "8b,    |
+|    `"YbbdP"Y8  88           `"YbbdP"Y8  8P'     `Y8   |
+|    aa,    ,88               aa,    ,88                |
+|     "Y8bbdP"                 "Y8bbdP"      By grgsh   |
+|                                                       |
++-------------------------------------------------------+
+'@
+
+        # Output the logo with a blank line for spacing
+        Write-Host ""
+        Write-Host $Logo
+        Write-Host ""
+}
+
+Export-ModuleMember -Function Copy-DirectoryIfExist, Get-RemoteZip, Expand-ReleaseZip, Show-GrgxLogo
+Export-ModuleMember -Variable checkmark
