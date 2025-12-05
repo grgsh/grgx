@@ -1,22 +1,23 @@
 param(
-        [Parameter(Mandatory = $true)]
-        [ArgumentCompleter({ Get-GrgxCompletions $commandName $parameterName $wordToComplete $commandAst $fakeBoundParameters })]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]$ScriptName,
         [Parameter(ValueFromRemainingArguments = $true)]
         [string[]]$Arguments
 )
 
-# Load the completer
-. "$PSScriptRoot\grgx-completer.ps1"
+Write-AppLog -Message "Starting script execution: '$ScriptName' with arguments: [$($Arguments -join ',')]" -LogLevel 'INFO'
 
 # Construct the full path to the script
-$scriptPath = Join-Path $modulesDir "$ScriptName.ps1"
+$ScriptPath = Join-Path $Config.ModulesDirectory "$ScriptName.ps1"
 
 # Check if the script exists and execute it
-if (Test-Path $scriptPath) {
-        #Write-Host "Executing script: '$scriptPath'";
-        & $scriptPath @Arguments
+if (Test-Path $ScriptPath) {
+        & $ScriptPath @Arguments
 }
 else {
-        Write-Error "Script '$ScriptName' not found in $modulesDir. Please ensure the script exists and has a .ps1 extension."
+        Write-Host "Script '$ScriptName' not found.`n" -ForegroundColor Red
+        Write-Host "Available scripts:"
+        Get-ChildItem "$($Config.ModulesDirectory)\*.ps1" | ForEach-Object { Write-Host " - $($_.BaseName)" }
+        
+        Write-AppLog -Message "Tried to execute '$ScriptName' but it could not be found in $($Config.ModulesDirectory)." -LogLevel 'ERROR'
 }

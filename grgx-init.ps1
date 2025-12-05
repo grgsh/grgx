@@ -1,10 +1,13 @@
-# Setup script for grgx command completion
-# Run this in your PowerShell profile to enable tab completion for grgx
+$ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
-# Load the completer definitions
-. "$PSScriptRoot\grgx-completer.ps1"
+Import-Module (Join-Path $ScriptRoot "GrgxConfig.psm1")
+Import-Module (Join-Path $ScriptRoot "GrgxUtilities.psm1")
+Import-Module (Join-Path $ScriptRoot "GrgxCompletions.psm1")
 
-# Register the argument completer for the grgx command
-Register-ArgumentCompleter -CommandName grgx -ScriptBlock $grgxCompleter
+Get-Command Get-GrgxCompletions
 
-Write-Host "grgx tab completion has been set up!"
+Register-ArgumentCompleter -CommandName grgx, grgx.ps1 -ScriptBlock {
+        Get-GrgxCompletions $commandName $parameterName $wordToComplete $commandAst $fakeBoundParameters
+}
+
+# Write-Host "grgx tab completion initialized. the new way"
