@@ -1,23 +1,10 @@
-param(
-        [Parameter(Mandatory = $true, Position = 0)]
-        [string]$ScriptName,
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$Arguments
-)
-
-Write-AppLog -Message "Starting script execution: '$ScriptName' with arguments: [$($Arguments -join ',')]" -LogLevel 'INFO'
-
-# Construct the full path to the script
-$ScriptPath = Join-Path $Config.ModulesDirectory "$ScriptName.ps1"
-
-# Check if the script exists and execute it
-if (Test-Path $ScriptPath) {
-        & $ScriptPath @Arguments
+# Import the Grgx module (adjust path if structure changes)
+$ModulePath = Join-Path $PSScriptRoot 'src\Grgx.psm1'
+if (-not (Test-Path $ModulePath)) {
+        Write-Host "Error: Grgx module not found at '$ModulePath'. Ensure the module is built correctly." -ForegroundColor Red
+        exit 1
 }
-else {
-        Write-Host "Script '$ScriptName' not found.`n" -ForegroundColor Red
-        Write-Host "Available scripts:"
-        Get-ChildItem "$($Config.ModulesDirectory)\*.ps1" | ForEach-Object { Write-Host " - $($_.BaseName)" }
-        
-        Write-AppLog -Message "Tried to execute '$ScriptName' but it could not be found in $($Config.ModulesDirectory)." -LogLevel 'ERROR'
-}
+Import-Module $ModulePath
+
+# Delegate to the module's core function, passing all args (it handles parsing internally)
+Invoke-GrgxScript @args
