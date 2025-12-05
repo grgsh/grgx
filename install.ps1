@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
-        [Parameter(Mandatory = $false, HelpMessage = "Use local source directory instead of downloading from remote.")]
-        [switch]$Local
+        [Parameter(Mandatory = $false, HelpMessage = "Install straight from the latest repository source instead of local files.")]
+        [switch]$Remote
 )
 
 $invocationDirectory = Split-Path -Parent $MyInvocation.MyCommand.Definition
@@ -15,18 +15,16 @@ Write-Verbose "Install directory: $installDir"
 Write-Verbose "Plugins directory: $pluginsDir"
 Write-Verbose "Remote ZIP URL: $remoteZipUrl"
 
-
-
 # 1. Get source directory
-if ($Local) {
-        Write-Host "Using local source for installation..."
-        $sourceDir = $invocationDirectory
-}
-else {
+if ($Remote) {
         $zipDir = Get-RemoteZip -Url $remoteZipUrl
         Start-Sleep -Seconds 1
 
         $sourceDir = Expand-ReleaseZip -Path $zipDir
+}
+else {
+        Write-Host "Using local source for installation..."
+        $sourceDir = $invocationDirectory
 }
 Write-Verbose "Source directory: $sourceDir"
 Start-Sleep -Seconds 1
