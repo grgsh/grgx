@@ -121,13 +121,14 @@ function Expand-ReleaseZip {
                 if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
                 Expand-Archive -Path $Path -DestinationPath $tempDir -Force
     
-                # $extractedRoot = Get-ChildItem $tempDir -Directory | Select-Object -First 1
 
                 Write-Host "$checkmark " -ForegroundColor Green -NoNewline
                 Write-Host "Extracted"
                 Write-Verbose "Extracted to $tempDir"
 
-                return $tempDir
+                # Github zips usually contain a single root folder; return its path
+                $extractedRoot = Get-ChildItem $tempDir -Directory | Select-Object -First 1
+                return $extractedRoot.FullName
         }
         catch {
                 Write-Error "Failed to extract zip from '$Path'. Error: $($_.Exception.Message)"
