@@ -1,5 +1,7 @@
+$GrgxRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Definition)
+
 # Import the Grgx module (adjust path if structure changes)
-$ModulePath = Join-Path $PSScriptRoot 'src\Grgx.psm1'
+$ModulePath = Join-Path $GrgxRoot 'lib\Grgx.psm1'
 if (-not (Test-Path $ModulePath)) {
         Write-Host "Error: Grgx module not found at '$ModulePath'. Ensure the module is built correctly." -ForegroundColor Red
         exit 1
