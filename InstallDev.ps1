@@ -1,8 +1,7 @@
-$repoZipUrl = "https://github.com/grgsh/grgx/archive/refs/heads/main.zip"
 $installDir = Join-Path $env:APPDATA ".grgh\grgx"
 $modulesDir = Join-Path $installDir "modules"
 
-Write-Host "Installing grgx suite to $installDir from $repoZipUrl..."
+Write-Host "Installing grgx suite to $installDir from LOCAL..."
 
 # 1. Create directories
 if (-not (Test-Path $installDir)) {
@@ -15,20 +14,8 @@ if (-not (Test-Path $modulesDir)) {
 }
 
 # 2. Download and Extract
-$tempZip = Join-Path $env:TEMP "grgx-ps.zip"
-$tempDir = Join-Path $env:TEMP "grgx-ps-extract"
-
 try {
-        Write-Host "Downloading repository..."
-        Invoke-WebRequest -Uri $repoZipUrl -OutFile $tempZip
-    
-        Write-Host "Extracting files..."
-        if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
-        Expand-Archive -Path $tempZip -DestinationPath $tempDir -Force
-    
-        # Find the root folder inside the zip (e.g., grgx-ps-main)
-        $extractedRoot = Get-ChildItem $tempDir -Directory | Select-Object -First 1
-        $sourceDir = $extractedRoot.FullName
+        $sourceDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
         # 3. Copy files
         $filesToCopy = (Get-ChildItem -Path $sourceDir -Include grgx*.ps1, grgx*.psm1 -Recurse).Name
@@ -40,7 +27,7 @@ try {
                         Write-Host "Copied $file"
                 }
                 else {
-                        Write-Warning "File not found in archive: $file"
+                        Write-Warning "File not found: $file"
                 }
         }
 
@@ -55,11 +42,6 @@ try {
 catch {
         Write-Error "Installation failed: $_"
         exit 1
-}
-finally {
-        # Cleanup
-        if (Test-Path $tempZip) { Remove-Item $tempZip -Force }
-        if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
 }
 
 # 5. Add to PATH
@@ -78,4 +60,4 @@ Write-Host "`nInstallation Complete!"
 Write-Host "----------------------"
 Write-Host "1. Restart your terminal."
 Write-Host "2. To enable tab completion, add this to your PowerShell profile (`$PROFILE`):"
-Write-Host "   . `"$installDir\grgx-setup.ps1`""
+Write-Host "   . `"$installDir\grgx-init.ps1`""
