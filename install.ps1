@@ -28,20 +28,21 @@ else {
 
         $sourceDir = Expand-ReleaseZip -Path $zipDir
 }
-Start-Sleep -Seconds 1
-
-Write-Host "Copying source files... " -NoNewline
 Write-Verbose "Source directory: $sourceDir"
+Start-Sleep -Seconds 1
 
 # 2. Create directories
 if (-not (Test-Path $installDir)) {
         New-Item -ItemType Directory -Force -Path $installDir | Out-Null
-        Write-Host "Created directory: $installDir"
+        Write-Verbose "Created directory: $installDir"
 }
 if (-not (Test-Path $pluginsDir)) {
         New-Item -ItemType Directory -Force -Path $pluginsDir | Out-Null
-        Write-Host "Created directory: $pluginsDir"
+        Write-Verbose "Created directory: $pluginsDir"
 }
+
+
+Write-Host "Copying source files... " -NoNewline
 
 # 3. Copy lib/
 Copy-DirectoryIfExist -SourceRoot $sourceDir -InstallRoot $installDir -FolderName "lib"
