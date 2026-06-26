@@ -5,6 +5,10 @@ param(
 
 $branch = "$name"
 
+if ([string]::IsNullOrWhiteSpace($branch)) {
+    throw "Parameter -name is required."
+}
+
 git fetch origin
 
 # Check if branch exists on remote
